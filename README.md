@@ -1,3 +1,25 @@
+# Pages
+https://www.codemag.com/article/1507101/Xamarin-Pages-The-Screens-of-an-App
+- ContentPage: A simple page that displays a single view, often used as a child page in other page types
+  - The basic structure is 
+``` XML
+<ContentPage>
+    <ContentPage.Content>
+        <StackLayout>
+            <Label/>
+            <Label/>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>
+```
+- MasterDetailPage: A divided page that show two pane
+- TabbedPage: Container for child pages. Switch between pages using a tabbed interface
+- CarouselPage: Container for child pages. Switch between pages using a swipe gesture
+- NavigationPage: Provides a service that supplies a back stack and allows navigation to pages within the app
+
+# Resource Directory
+You can define resources on Application or Page level
+
 # Environment
 folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
 
