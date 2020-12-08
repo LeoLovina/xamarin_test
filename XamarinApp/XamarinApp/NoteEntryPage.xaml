@@ -20,10 +20,13 @@
         </Style>
     </ContentPage.Resources>
     <StackLayout Margin="20">
+        <ActivityIndicator IsRunning="False" x:Name="Indicator" ></ActivityIndicator>
+        <Button Text="Start" x:Name="BtnStart" Clicked="BtnStart_OnClicked" />
+        <Button Text="Start" x:Name="BtnStop" Clicked="BtnStop_OnClicked" />
         <Editor Placeholder="Enter your note" 
                 Text="{Binding Text}"
                 HeightRequest="100"
-                />
+        />
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />

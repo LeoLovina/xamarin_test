@@ -15,6 +15,7 @@
     </ContentPage.ToolbarItems>
     <ContentPage.Content>
         <StackLayout>
+            <ActivityIndicator IsRunning="False"></ActivityIndicator>
             <ListView x:Name="ListView" Margin="{StaticResource PageMargin}" ItemSelected="OnListViewItemSelected" >
                 <ListView.ItemTemplate>
                     <DataTemplate>

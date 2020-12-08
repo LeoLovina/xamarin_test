@@ -1,3 +1,20 @@
+#XAML
+- XAML is basically XML
+- using XAML for implementing MVVM
+``` C#
+namespace XamarinApp
+{
+    public partial class NotesPage : ContentPage
+    {
+```
+``` XML
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="XamarinApp.NotesPage"
+             Title="Notes">
+```
+- When Visual Studio builds the project, it parses the XAML file to generate a C# code file. look into \obj\Debug directory
+- At runtime, code in the particular platform project calls a LoadApplication method and then InitializeComponent calls the LoadFromXaml method that extracts the XAML file 
 # Pages
 https://www.codemag.com/article/1507101/Xamarin-Pages-The-Screens-of-an-App
 - ContentPage: A simple page that displays a single view, often used as a child page in other page types

@@ -14,6 +14,7 @@ namespace XamarinApp
             InitializeComponent();
         }
 
+
         async void OnSaveButtonClicked(object sender, EventArgs e)
         {
             var note = (Note)BindingContext;
@@ -27,6 +28,16 @@ namespace XamarinApp
             var note = (Note) BindingContext;
             await App.Database.DeleteNoteAsync(note);
             await Navigation.PopAsync();
+        }
+
+        private void BtnStart_OnClicked(object sender, EventArgs e)
+        {
+            Indicator.IsRunning = true;
+        }
+
+        private void BtnStop_OnClicked(object sender, EventArgs e)
+        {
+            Indicator.IsRunning = false;
         }
     }
 }
