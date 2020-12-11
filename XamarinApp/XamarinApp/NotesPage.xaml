@@ -15,7 +15,10 @@
     </ContentPage.ToolbarItems>
     <ContentPage.Content>
         <StackLayout>
-            <ActivityIndicator IsRunning="False"></ActivityIndicator>
+            <Label Text="Rotation" BindingContext="{x:Reference Name=Slider}" Rotation="{Binding Path=Value}" FontSize="Large" VerticalOptions="CenterAndExpand"></Label>
+            <Slider x:Name="Slider" Maximum="360" VerticalOptions="CenterAndExpand"></Slider>
+            <Label BindingContext="{x:Reference Name=Slider}" Text="{Binding Value,StringFormat='The angle is {0:F0} degree'}" FontSize="Large" HorizontalOptions="Center" VerticalOptions="CenterAndExpand"></Label>
+            <Button Text="SliderTransform" x:Name="SliderTransform" Clicked="SliderTransform_OnClicked"></Button>
             <ListView x:Name="ListView" Margin="{StaticResource PageMargin}" ItemSelected="OnListViewItemSelected" >
                 <ListView.ItemTemplate>
                     <DataTemplate>
