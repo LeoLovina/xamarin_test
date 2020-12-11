@@ -22,6 +22,7 @@ namespace XamarinApp
 
         protected override async void OnAppearing()
         {
+            this.Title = "Haha";
             base.OnAppearing();
             ListView.ItemsSource = await App.Database.GetNotesAsync();
         }
@@ -46,6 +47,11 @@ namespace XamarinApp
                     BindingContext = e.SelectedItem as Note
                 });
             }
+        }
+
+        private void SliderTransform_OnClicked(object sender, EventArgs e)
+        {
+            Navigation.PushAsync(new SliderTransform());
         }
     }
 }

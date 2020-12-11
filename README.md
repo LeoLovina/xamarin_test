@@ -39,7 +39,9 @@ https://www.codemag.com/article/1507101/Xamarin-Pages-The-Screens-of-an-App
 - NavigationPage: Provides a service that supplies a back stack and allows navigation to pages within the app
 
 # Resource Directory
-You can define resources on Application or Page level
+- You can define resources on Application or Page level.
+- Each item requires a dictionary key specified with the x:Key attribute
+- it searches up the visual tree and uses the first ResourceDictionary it encounters containing that key.
 
 # Environment
 folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
