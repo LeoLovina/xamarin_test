@@ -4,10 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+//using GrpcClient;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using XamarinApp.Models;
+using GrpcClient;
 
 namespace XamarinApp
 {
@@ -27,6 +28,9 @@ namespace XamarinApp
 
         async void OnNoteAddedClicked(object sender, EventArgs e)
         {
+            var client = new Client();
+            var result = await client.GetJobsStatus();
+
             await Navigation.PushAsync(new NoteEntryPage
             {
                 BindingContext = new Note()
