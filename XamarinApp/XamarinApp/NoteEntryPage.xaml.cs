@@ -14,6 +14,11 @@ namespace XamarinApp
             InitializeComponent();
         }
 
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+
+        }
 
         async void OnSaveButtonClicked(object sender, EventArgs e)
         {

@@ -1,0 +1,596 @@
+// Define syntax explicitly, otherwize it will be "proto2"
+syntax = "proto3";
+
+// Package defines a namespace in C#, C++ or Ruby and package in Java
+package RimageUsbApi;
+
+// ------------------------------------------------------------------------------------- //
+// ------------------- API Services and their Functions Declaration -------------------- //
+// ------------------------------------------------------------------------------------- //
+
+// API Service to communicate to Rimage USB Stations, submit and track Jobs and get Notifications
+service UsbApiService
+{
+    // Returns a collection of USB Publishing Stations connected to the Messaging Server
+    rpc GetStations(GetStationsRequest) returns (GetStationsResult) {}
+
+    // Allows to control state of the Station and/or its hardware
+    rpc ExecuteStationCommand(StationCommandRequest) returns (StationCommandResult) {}
+
+    // Submit new Usb Job to the default USB Job Queue
+    rpc SubmitJob(UsbJob) returns (SubmitJobResult) {}
+
+    // Returns a collection of existing Usb Jobs and their state
+    rpc GetJobsStatus(GetJobsStatusRequest) returns (GetJobsStatusResult) {}
+
+    // Tries to Cancel an existing USB Job by its ID. If Job does not exist or cannot be canceled, the result will have an appropriate message.
+    // A job can be canceled immediatelly if the job is Pending (has not been picked up by a USB Station yet) or is in progress and the Station is online.
+    // If the Station is not ready to receive a direct request from the Messaging Server to Cancel the Job, Messaging Server will publish the Cancelation request
+    // for the station to process when the Station is ready. In this case CancelJobResult will not wait until the Job is canceled and will immediately return 'Cancelling' result.
+    rpc CancelJob(CancelJobRequest) returns (CancelJobResult) {}
+
+    // Returns a collection of existing Station Notifications
+    rpc GetNotifications(GetNotificationsRequest) returns (GetNotificationsResult) {}
+
+    // Allows to acknowledge or react on a notification by choosing one of the notification actions
+    rpc TakeNotificationAction(TakeNotificationActionRequest) returns (NotificationActionResult) {}
+}
+
+// ------------------------------------------------------------------------------------- //
+// ---------------------- USB Station and System Types Declaration --------------------- //
+// ------------------------------------------------------------------------------------- //
+
+// Allows to define search filters when requesting information about available USB stations.
+// Different types of criteria will be combined by AND rule. For example, if the request has:
+//     StationIds = ["STATION_A", "STATION_B"]
+//     StationStatuses = ["Online"]
+// then the selection logic will be:
+//     (StationId == "STATION_A" or StationId == "STATION_B") and (Status == "Online")
+message GetStationsRequest
+{
+    // Specify station id(s) from which you want to get the data. If empty, all available stations will be returned.
+    repeated string StationIds = 1;
+
+    // Specify station status from which you want to get the data. If empty, stations with any status will be returned.
+    repeated UsbStationStatus StationStatuses = 2;
+}
+
+// Contains a collection of found stations
+message GetStationsResult
+{
+    repeated UsbStation Stations = 1;
+}
+
+message UsbStation
+{
+    //Unique Production Station Identifier
+    string StationId = 1;
+
+    // Current version of Production Station Software
+    string SoftwareVersion = 2;
+
+    // Production Station Computer Name
+    string Hostname = 3;
+
+    // Production Station Computer IP Address
+    string IpAddress = 4;
+
+    // Path to Rimage Working (System) Folder on this Production Station
+    string SystemFolder = 5;
+
+    // Operating System Version
+    string OsVersion = 6;
+
+    // Drive letters used for cache. For example, for C: and D: drives this property will have "cd"
+    string CacheDrives = 7;
+
+    // Station status
+    UsbStationStatus Status = 8;
+
+    // Hardware info
+    SystemInformation System = 10;
+}
+
+enum UsbStationStatus
+{
+    UnknownStatus = 0;
+    Stopped = 1;
+    Starting = 2;
+    Online = 3;
+    Pausing = 4;
+    Paused = 5;
+    Stopping = 6;
+}
+
+message SystemInformation
+{
+    string InquiryString = 1;
+    bool Offline = 2;
+    string FirmwareVersion = 3;
+    string SerialNumber = 4;
+    PrinterInformation Printer = 5;
+    repeated DataModuleInputBin DataModuleInputBins = 10;
+    repeated CaseInputBin CaseInputBins = 20;
+    repeated OutputBin OutputBins = 30;
+}
+
+message PrinterInformation
+{
+    PrinterRibbonType Ribbon = 1;
+    string InquiryString = 2;
+    bool Offline = 3;
+    int32 PrintCount = 4;
+    int32 LabelsRemaining = 5;
+    int32 RibbonPanelSetsRemaining = 6;
+    int32 RetransferSheetPanelsRemaining = 7;
+    string Manufacturer = 8;
+    string Model = 9;
+    string FirmwareVersion = 10;
+    string SerialNumber = 11;
+}
+
+enum PrinterRibbonType
+{
+    UnknownRibbon = 0;
+    MonoRibbon = 1;
+    ColorRibbon = 2;
+}
+
+// This structure describes a data module input bin and attached recorder.
+message DataModuleInputBin
+{
+    string Id = 1;
+    DataModuleMagazineInformation DataModuleMagazine = 2; // Empty or null if magazine is not inserted.
+    RecorderInformation Recorder = 3;
+}
+
+message DataModuleMagazineInformation
+{
+    InputBinDataModuleUsbVersion DataModuleUsbVersion = 1;
+    InputBinDataModuleCapacityType DataModuleCapacity = 2;
+    int32 Quantity = 3;
+}
+
+enum InputBinDataModuleUsbVersion
+{
+    UnknownUsbVersion = 0; // When the magazine is empty, or system failed to recognize the data module.
+    Usb20 = 1;
+    Usb30 = 2;
+}
+
+enum InputBinDataModuleCapacityType
+{
+    UnknownCapacity = 0; // When the magazine is empty, or system failed to recognize the data module.
+    Module8GB = 1;
+    Module16GB = 2;
+    Module32GB = 3;
+    Module64GB = 4;
+    Module128GB = 5;
+}
+
+message RecorderInformation
+{
+    bool Offline = 1;
+    int32 TotalInsertionsCount = 2;
+}
+
+// Describes a case input bin, type of its cases and quantity
+message CaseInputBin
+{
+    string Id = 1;
+    CaseMagazineInformation CaseMagazine = 2; // Empty or null if magazine is not inserted.
+}
+
+message CaseMagazineInformation
+{
+    CaseType Case = 1;
+    int32 Quantity = 2;
+}
+
+enum CaseType
+{
+    ThumbDrive = 0;
+    PocketDrive = 1;
+}
+
+message OutputBin
+{
+    string Id = 1;
+    CaseType Type = 2;
+    OutputBinJobResultType JobResultType = 3;
+    int32 Quantity = 4;
+}
+
+enum OutputBinJobResultType
+{
+    NotSet = 0;
+    CompletedJobs = 1;
+    FailedJobs = 2; // All kinds of unsuccessful: Canceled, Rejected or Failed
+}
+
+// ------------------------------------------------------------------------------------- //
+// ----------------- Station Command Request and Response Dclarations ------------------ //
+// ------------------------------------------------------------------------------------- //
+
+message StationCommandRequest
+{
+    string ClientId = 1;
+    string StationId = 2;
+    StationCommandType CommandType = 3;
+
+    // If CommandType == DisableRecorder or EnableRecorder, this field must have the ID of the bin which the recorder is attached to.
+    string RecorderBinId = 4;
+}
+
+enum StationCommandType
+{
+    PauseStation = 0;
+    ResumeStation = 1;
+    DisableSystem = 2;
+    EnableSystem = 3;
+    DisablePrinter = 4;
+    EnablePrinter = 5;
+    DisableRecorder = 6;
+    EnableRecorder = 7;
+}
+
+message StationCommandResult
+{
+    CommandResultType Result = 1;
+    int32 ErrorCode = 2;
+    string ErrorMessage = 3;
+}
+
+enum CommandResultType
+{
+    CommandInProcess = 0;
+    CommandCompleted = 1;
+    CommandFailed = 2;
+}
+
+// ------------------------------------------------------------------------------------- //
+// -------------------------------- USB Job Declarations ------------------------------- //
+// ------------------------------------------------------------------------------------- //
+
+message UsbJob
+{
+    // Generic Job Information
+    string ClientId = 1;
+    string JobId = 2; //Must be unique among all jobs sent through this Messaging Server to the Station Group.
+    string Originator = 3; // An optional value if jobs sent with the same ClientId have different origin which needs to be tracked.
+    JobPriority Priority = 4;
+    string TargetStationId = 5; //Optional. If empty, the first available station which has required media and cases will handle the job.
+    JobPrinterRibbonType PrinterRibbon = 6;
+    JobDataModuleCapacityType DataModuleCapacity = 7;
+    JobUsbVersion DataModuleUsbVersion = 8;
+    CaseType Case = 9;
+    uint32 Copies = 10; // Must be > 0.
+    bool VerifyAfterCopying = 11;
+    bool BootableDrive = 12;
+    bool WriteProtect = 13;
+    bool PrintRejectLabelOnFailure = 14;
+    string StreamServerHost = 15;
+    string StreamServerUser = 16;
+    FileSystemType FileSystem = 17;
+    string VolumeName = 18; // Must be up to 11 characters for FAT32 or ExFAT and up to 32 characters for NTFS.
+
+    // Content
+    oneof Content
+    {
+        IsoImageContent IsoImage = 30;
+        ZipContainerContent ZipContainer = 31;
+        EditListFileContent EditList = 32;
+        ContentListContent ContentList = 33;
+        ExtensionContent Extension = 34;
+    }
+
+    // Labels
+    LabelInformation Label = 40; // Optional. If no LabelInformation is provided, printing will be skipped.
+    LabelInformation RejectLabel = 41; //Optional. If no LabelInformation is provided anb PrintRejectLabelOnFailure = true, standard Reject label will be printed.
+}
+
+message SubmitJobResult
+{
+    bool Success = 1;
+    string ErrorMessage = 2;
+}
+
+enum JobPriority
+{
+    Normal = 0;
+    Low = 1;
+    High = 2;
+}
+
+enum JobPrinterRibbonType
+{
+    Any = 0;
+    Mono = 1;
+    Color = 2;
+}
+
+enum JobDataModuleCapacityType
+{
+    Usb8GB = 0;
+    Usb16GB = 1;
+    Usb32GB = 2;
+    Usb64GB = 3;
+    Usb128GB = 4;
+}
+
+enum JobUsbVersion
+{
+    AnyUsbVersion = 0;
+    Usb20Version = 1;
+    Usb30Version = 2;
+}
+
+enum FileSystemType
+{
+    FAT32 = 0;
+    ExFAT = 1;
+    NTFS = 2;
+}
+
+message IsoImageContent
+{
+    string IsoFilename = 1;
+    string DestinationPath = 2;
+}
+
+message ZipContainerContent
+{
+    string ZipFilename = 1;
+    string DestinationPath = 2;
+}
+
+message EditListFileContent
+{
+    string EditListFilename = 1;
+    EncryptedZipInformation EncryptedZip = 2;
+}
+
+message ContentListContent
+{
+    repeated ContentListFolder Folders = 1;
+    repeated ContentListFile Files = 2;
+    EncryptedZipInformation EncryptedZip = 3;
+}
+
+message ContentListFolder
+{
+    string SourcePath = 1;
+    string DestinationPath = 2;
+    bool IncludeSubfolders = 3;
+}
+
+message ContentListFile
+{
+    string SourceFilename = 1;
+    string DestinationPath = 2;
+}
+
+message EncryptedZipInformation
+{
+    string ZipFilename = 1;
+    string ZipPassword = 2;
+    bool SelfExtracting = 3;
+}
+
+message ExtensionContent
+{
+    string ExecutableFile = 1;
+    string DataFile = 2;
+    uint32 TimeoutInMinutes = 3;
+}
+
+message LabelInformation
+{
+    string Filename = 1;
+    EverestColorMatching ColorMatching = 2;
+    oneof MergeData
+    {
+        // A full path to external Merge File
+        string MergeFilename = 10;
+        // A table of one or more merge data records where each record is a set of Merge Field name-value pairs for the Label.
+        // Required number of records depends on the requested number of copies in the Job. If more than one copy is requested,
+        // the MergeRecords must have either 1 record or at least as many records as many copies is requested.
+        // If MergeRecords has one record, all copies will render merge values from this record.
+        // If MergeRecords has multiple records, then each copy will take merge data from corresponding record.
+        MergeDataTable MergeTable = 11;
+    }
+}
+
+enum EverestColorMatching
+{
+    Photograph = 0;
+    CMYK = 1;
+    None = 2;
+}
+
+message MergeDataTable
+{
+    repeated MergeRecord Records = 1;
+}
+
+message MergeRecord
+{
+    // A collection of Key-Value pairs (hash-table) for the label merge fields.
+    // Key must equal to the Merge Field Name in the Label. Value is the data which must be rendered.
+    map<string, string> Fields = 1;
+}
+
+// ------------------------------------------------------------------------------------- //
+// ----------------------------- USB Job Status Declarations --------------------------- //
+// ------------------------------------------------------------------------------------- //
+
+// Allows to define search filters when requesting information about existing USB Jobs.
+// Different types of criteria will be combined by AND rule. For example if the request has:
+//     StationIds = ["STATION_A", "STATION_B"]
+//     Statuses = ["InProcess"]
+// then the selection logic will be:
+//     (StationId == "STATION_A" or StationId == "STATION_B") and (Statuses == "InProcess")
+message GetJobsStatusRequest
+{
+    repeated string JobIds = 1;
+    repeated string StationIds = 2;
+    repeated UsbJobStatus Statuses = 3;
+    repeated UsbJobStage Stages = 4;
+    bool IncludeJobData = 5; // If True, then the complete job data will be present in the UsbJobStatusInformation.Job property.
+}
+
+message GetJobsStatusResult
+{
+    repeated UsbJobStatusInformation Jobs = 1;
+}
+
+message UsbJobStatusInformation
+{
+    string JobId = 1;
+    UsbJobStatus Status = 2;
+    UsbJobStage Stage = 3;
+    int32 StatusMessageCode = 4;
+    string StatusMessage = 5;
+    uint32 CopiesRequested = 6;
+    uint32 CopiesCompleted = 7;
+    uint32 PercentCompleted = 8;
+    string StationId = 9;
+    string SubmittedUtcTime = 10; // Time when the Job was submitted. Format: CCYY-MM-DD HH:MM:SS
+    string StartedUtcTime = 11;   // Time when Job was received by a Station. Format: CCYY-MM-DD HH:MM:SS
+    string FinishedUtcTime = 12;  // Time when the Job was finished (Completed/Failed/Rejected/Canceled). Format: CCYY-MM-DD HH:MM:SS
+
+    UsbJob Job = 20;
+}
+
+enum UsbJobStatus
+{
+    NotStarted = 0;
+    InProcess = 1;
+    Completed = 2;
+    Canceled = 3;
+    Failed = 4;
+    Rejected = 5;
+}
+
+enum UsbJobStage
+{
+    Downloading = 0;
+    Waiting = 1;
+    Loading = 2;
+    Streaming = 3;
+    Formatting = 4;
+    Writing = 5;
+    Verifying = 6;
+    Assembling = 7;
+    Printing = 8;
+    Unloading = 9;
+    Finished = 10;
+}
+
+message CancelJobRequest
+{
+    string ClientId = 1; // ID of the client who is requesting to cancel the job. May differ from the client who submitted the job.
+    string JobId = 2; // ID of the Job to cancel.
+}
+
+message CancelJobResult
+{
+    CancelJobResultType Result = 1;
+    int32 ErrorCode = 2;
+    string ErrorMessage = 3;
+}
+
+enum CancelJobResultType
+{
+    Succeeded = 0;
+    Canceling = 1; // A request to cancel the job was published and will be handled once station is online
+    JobNotFound = 2;
+    AlreadyCanceled = 3;
+    CannotBeCanceled = 4; // Returned when the job is already in final state (Completed, Failed, Rejected)
+    CancelationFailed = 5; // Error details should come in ErrorCode and ErrorMessage
+}
+
+// ------------------------------------------------------------------------------------- //
+// ----------------------------- Notifications Declaration ----------------------------- //
+// ------------------------------------------------------------------------------------- //
+
+// Allows to define search filters when requesting information about existing USB Notifications.
+// Different types of criteria will be combined by AND rule. For example if the request has:
+//     StationIds = ["STATION_A", "STATION_B"]
+//     Type = [Alert]
+// then the selection logic will be:
+//     (StationId == "STATION_A" or StationId == "STATION_B") and (Type = Alert)
+message GetNotificationsRequest
+{
+    repeated string StationIds = 1;
+    repeated string JobIds = 2;
+}
+
+// Contains a collection of existing active Notifications that match the filter criteria in GetNotificationsRequest
+message GetNotificationsResult
+{
+    repeated UsbNotification Notifications = 1;
+}
+
+message UsbNotification
+{
+    // Unique ID of the notification. Must be used for taking actions that this notification provides
+    string NotificationId = 1;
+
+    UsbNotificationType Type = 2;
+
+    // ID of the station which sent this notification
+    string StationId = 3;
+
+    // ID of the job which caused the notification or empty if the notification is not job-related
+    string JobId = 6;
+
+    // The title (or subject) of the notification to display it on the client's UI
+    string Title = 4;
+    
+    // The message which describes what happened and possible resolution
+    string Message = 5;
+    
+    // The code which uniquely identifies the message (to allow client software to display their own messages)
+    string MessageCode = 7;
+    
+    // Name of the device that caused the notification
+    string Device = 9;
+    
+    // True if the station run out of supplies or output bin are full
+    bool SupplyError = 10;
+    
+    // Date and Time when the Notification was generated. Format: CCYY-MM-DD HH:MM:SS
+    string UtcTime = 11;
+
+    // A collection of actions which client software can choose to react on the notification by calling TakeNotificationAction() function.
+    repeated UsbNotificationAction Actions = 20;
+}
+
+enum UsbNotificationType
+{
+    Alert = 0;
+    Error = 1;
+}
+
+// Describes an action which clients can use to react of the Notification
+message UsbNotificationAction
+{
+    string ActionId = 1;
+    string Title = 2;
+}
+
+message TakeNotificationActionRequest
+{
+    string NotificationId = 1;
+    string ClientId = 2;
+    string StationId = 3;
+    string ActionId = 4;
+}
+
+message NotificationActionResult
+{
+    CommandResultType Result = 1;
+    int32 ErrorCode = 2;
+    string ErrorMessage = 3;
+}

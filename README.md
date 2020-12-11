@@ -15,6 +15,10 @@ namespace XamarinApp
 ```
 - When Visual Studio builds the project, it parses the XAML file to generate a C# code file. look into \obj\Debug directory
 - At runtime, code in the particular platform project calls a LoadApplication method and then InitializeComponent calls the LoadFromXaml method that extracts the XAML file 
+# Android Emulator networking
+https://developer.android.com/studio/run/emulator-networking
+10.0.2.2	Special alias to your host loopback interface (i.e., 127.0.0.1 on your development machine)
+127.0.0.1	The emulated device loopback interface
 # Pages
 https://www.codemag.com/article/1507101/Xamarin-Pages-The-Screens-of-an-App
 - ContentPage: A simple page that displays a single view, often used as a child page in other page types
