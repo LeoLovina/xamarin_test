@@ -1,6 +1,9 @@
 #XAML
 - XAML is basically XML
 - using XAML for implementing MVVM
+- A static Current property that contains a reference to the current application object.
+  - Use App.Current to get the reference 
+` x:Class="XamarinApp.NotesPage" ` specify the class for the XMAL file (code-behind)
 ``` C#
 namespace XamarinApp
 {
@@ -15,6 +18,19 @@ namespace XamarinApp
 ```
 - When Visual Studio builds the project, it parses the XAML file to generate a C# code file. look into \obj\Debug directory
 - At runtime, code in the particular platform project calls a LoadApplication method and then InitializeComponent calls the LoadFromXaml method that extracts the XAML file 
+# BindingContext
+- BindingContext is not ready on Constructor. It is available after (on) OnAppearing
+- Munally data bind
+``` XML
+<Editor Placeholder="Enter price"  x:Name="Price"></Editor>
+```
+``` C#
+public NoteEntryPage()
+{
+    InitializeComponent();
+    this.Price.SetBinding(Editor.TextProperty, "Price");
+}
+```
 # Android Emulator networking
 https://developer.android.com/studio/run/emulator-networking
 10.0.2.2	Special alias to your host loopback interface (i.e., 127.0.0.1 on your development machine)

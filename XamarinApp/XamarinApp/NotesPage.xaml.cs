@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-//using GrpcClient;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using XamarinApp.Models;
@@ -22,15 +21,20 @@ namespace XamarinApp
 
         protected override async void OnAppearing()
         {
-            this.Title = "Haha";
             base.OnAppearing();
             ListView.ItemsSource = await App.Database.GetNotesAsync();
+
+            // 
+            this.ClassId = "NotesPage";
+            Application.Current.Properties["ParentId"] = this.ClassId;
+            var ParentId = Application.Current.Properties["ParentId"];
         }
 
         async void OnNoteAddedClicked(object sender, EventArgs e)
         {
-            var client = new Client();
-            var result = await client.GetJobsStatus();
+            Console.WriteLine("****************** OnNoteAddedClicked ******************");
+            //var client = new Client();
+            //var result = await client.GetJobsStatus();
 
             await Navigation.PushAsync(new NoteEntryPage
             {
@@ -49,9 +53,10 @@ namespace XamarinApp
             }
         }
 
-        private void SliderTransform_OnClicked(object sender, EventArgs e)
+        private async void SliderTransform_OnClicked(object sender, EventArgs e)
         {
-            Navigation.PushAsync(new SliderTransform());
+            //await Navigation.PushAsync(new SliderTransform());
+            await Navigation.PopAsync();
         }
     }
 }

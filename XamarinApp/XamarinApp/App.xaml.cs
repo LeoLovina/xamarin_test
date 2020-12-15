@@ -27,21 +27,26 @@ namespace XamarinApp
 
         public App()
         {
+            // load and parse the associated XAML.
             InitializeComponent();
+
             FolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
             MainPage = new NavigationPage(new NotesPage());
         }
 
         protected override void OnStart()
         {
+            Console.WriteLine("App OnStart");
         }
 
         protected override void OnSleep()
         {
+            Console.WriteLine("App OnSleep");
         }
 
         protected override void OnResume()
         {
+            Console.WriteLine("App OnResume");
         }
     }
 }

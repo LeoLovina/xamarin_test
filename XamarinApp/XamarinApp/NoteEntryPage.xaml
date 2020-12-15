@@ -19,14 +19,19 @@
             <Setter Property="CornerRadius" Value="5" />
         </Style>
     </ContentPage.Resources>
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Alert" Clicked="MenuItem_OnClicked"></ToolbarItem>
+        <ToolbarItem Text="Action" Clicked="MenuItemAction_OnClicked"></ToolbarItem>
+    </ContentPage.ToolbarItems>
     <StackLayout Margin="20">
         <ActivityIndicator IsRunning="False" x:Name="Indicator" ></ActivityIndicator>
         <Button Text="Start" x:Name="BtnStart" Clicked="BtnStart_OnClicked" />
-        <Button Text="Start" x:Name="BtnStop" Clicked="BtnStop_OnClicked" />
+        <Button Text="Stop" x:Name="BtnStop" Clicked="BtnStop_OnClicked" />
         <Editor Placeholder="Enter your note" 
                 Text="{Binding Text}"
                 HeightRequest="100"
         />
+        <Editor Placeholder="Enter price"  x:Name="Price"></Editor>
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />

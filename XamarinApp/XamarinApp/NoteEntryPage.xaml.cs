@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -12,12 +13,20 @@ namespace XamarinApp
         public NoteEntryPage()
         {
             InitializeComponent();
+            this.Price.SetBinding(Editor.TextProperty, "Price");
         }
 
         protected override void OnAppearing()
         {
+            var note = (Note)BindingContext;
             base.OnAppearing();
+            var ParentId = Application.Current.Properties["ParentId"]?.ToString();
+        }
 
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+            Debug.WriteLine("OnDisappearing");
         }
 
         async void OnSaveButtonClicked(object sender, EventArgs e)
@@ -43,6 +52,17 @@ namespace XamarinApp
         private void BtnStop_OnClicked(object sender, EventArgs e)
         {
             Indicator.IsRunning = false;
+        }
+
+        private async void MenuItem_OnClicked(object sender, EventArgs e)
+        {
+            await DisplayAlert("Alert", "Everything is OK", "OK");
+        }
+
+        private async void MenuItemAction_OnClicked(object sender, EventArgs e)
+        {
+            string action = await DisplayActionSheet("ActionSheet: Send to?", "Cancel", null, "Email", "Twitter", "Facebook");
+            Debug.WriteLine("Action: " + action);
         }
     }
 }
